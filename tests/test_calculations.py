@@ -92,31 +92,39 @@ def test_insert_calculation_record(db_session):
 client = TestClient(app)
 
 def test_calculation_bread_operations(db_session):
-    # 1. ADD (POST)
-    post_res = client.post("/calculations", json={"a": 10, "b": 5, "type": "Add"})
+    # 1. Create a test user and log in to get a token
+    client.post("/users/register", json={"username": "calc_user", "email": "calc@test.com", "password": "secure123"})
+    login_res = client.post("/users/login", json={"username_or_email": "calc_user", "password": "secure123"})
+    token = login_res.json()["access_token"]
+    
+    # 2. Create the authorization headers
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 3. ADD (POST)
+    post_res = client.post("/calculations", json={"a": 10, "b": 5, "type": "Add"}, headers=headers)
     assert post_res.status_code == 201
     calc_id = post_res.json()["id"]
     assert post_res.json()["result"] == 15.0
 
-    # 2. BROWSE (GET all)
-    browse_res = client.get("/calculations")
+    # 4. BROWSE (GET all)
+    browse_res = client.get("/calculations", headers=headers)
     assert browse_res.status_code == 200
     assert len(browse_res.json()) >= 1
 
-    # 3. READ (GET one)
-    read_res = client.get(f"/calculations/{calc_id}")
+    # 5. READ (GET one)
+    read_res = client.get(f"/calculations/{calc_id}", headers=headers)
     assert read_res.status_code == 200
     assert read_res.json()["a"] == 10.0
 
-    # 4. EDIT (PATCH) - Let's change the operation to Multiply and 'b' to 2
-    patch_res = client.patch(f"/calculations/{calc_id}", json={"b": 2, "type": "Multiply"})
+    # 6. EDIT (PATCH) - Let's change the operation to Multiply and 'b' to 2
+    patch_res = client.patch(f"/calculations/{calc_id}", json={"b": 2, "type": "Multiply"}, headers=headers)
     assert patch_res.status_code == 200
     assert patch_res.json()["result"] == 20.0 # 10 * 2
 
-    # 5. DELETE
-    del_res = client.delete(f"/calculations/{calc_id}")
+    # 7. DELETE
+    del_res = client.delete(f"/calculations/{calc_id}", headers=headers)
     assert del_res.status_code == 204
 
-    # Confirm deletion
-    read_again = client.get(f"/calculations/{calc_id}")
+    # 8. Confirm deletion
+    read_again = client.get(f"/calculations/{calc_id}", headers=headers)
     assert read_again.status_code == 404

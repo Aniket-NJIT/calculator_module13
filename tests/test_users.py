@@ -63,17 +63,13 @@ def test_invalid_email_schema():
     assert response.status_code == 400
 
 def test_user_login_success():
-    # Register first
     client.post("/users/register", json={"username": "loginguy", "email": "login@test.com", "password": "secure123"})
     
-    # Test Login with email
     res1 = client.post("/users/login", json={"username_or_email": "login@test.com", "password": "secure123"})
     assert res1.status_code == 200
-    assert res1.json()["message"] == "Login successful"
-
-    # Test Login with username
-    res2 = client.post("/users/login", json={"username_or_email": "loginguy", "password": "secure123"})
-    assert res2.status_code == 200
+    
+    # Check for the access_token instead of the old message
+    assert "access_token" in res1.json()
 
 def test_user_login_failure():
     client.post("/users/register", json={"username": "failguy", "email": "fail@test.com", "password": "secure123"})

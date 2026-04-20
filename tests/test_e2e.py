@@ -1,13 +1,18 @@
 import pytest
+import time
 from playwright.sync_api import Page, expect
 
-# Change URL if your test server runs on a different port
-BASE_URL = "http://localhost:8000" #"http://127.0.0.1:8000/"
+BASE_URL = "http://localhost:8000"
+
+# Generate a unique ID once per test run to prevent database duplicate errors
+UNIQUE_ID = int(time.time())
+TEST_USER = f"e2e_user_{UNIQUE_ID}"
+TEST_EMAIL = f"e2e_{UNIQUE_ID}@test.com"
 
 def test_register_positive(page: Page):
     page.goto(f"{BASE_URL}/register")
-    page.fill("id=username", "e2e_user")
-    page.fill("id=email", "e2e@test.com")
+    page.fill("id=username", TEST_USER)
+    page.fill("id=email", TEST_EMAIL)
     page.fill("id=password", "secure123")
     page.click("id=registerBtn")
     
@@ -21,15 +26,14 @@ def test_register_negative_short_password(page: Page):
     page.fill("id=email", "fail@test.com")
     page.fill("id=password", "123") # Too short
     
-    # HTML5 validation should prevent submission, or JS intercepts it
     page.click("id=registerBtn")
     error_msg = page.locator("id=message")
     expect(error_msg).to_have_text("Password must be at least 6 characters.")
 
 def test_login_positive(page: Page):
-    # Ensure user exists first (depends on test execution order, or use a setup fixture)
+    # Uses the exact same unique user we just registered above!
     page.goto(f"{BASE_URL}/login")
-    page.fill("id=username", "e2e_user")
+    page.fill("id=username", TEST_USER)
     page.fill("id=password", "secure123")
     page.click("id=loginBtn")
     
@@ -39,7 +43,7 @@ def test_login_positive(page: Page):
 
 def test_login_negative_wrong_password(page: Page):
     page.goto(f"{BASE_URL}/login")
-    page.fill("id=username", "e2e_user")
+    page.fill("id=username", TEST_USER)
     page.fill("id=password", "WRONG_PASS")
     page.click("id=loginBtn")
     
