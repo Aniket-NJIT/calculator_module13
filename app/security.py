@@ -1,4 +1,6 @@
 import jwt
+import os
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -7,8 +9,10 @@ from passlib.context import CryptContext
 from app.database import get_db
 from app.models import User
 
+load_dotenv()
+
 # JWT Configurations
-SECRET_KEY = "your-super-secret-key-keep-this-safe" # In production, use environment variables!
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-for-local-dev-only")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

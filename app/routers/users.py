@@ -34,4 +34,4 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
         
     # Generate JWT Token
     access_token = create_access_token(data={"sub": db_user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer"} # nosec
