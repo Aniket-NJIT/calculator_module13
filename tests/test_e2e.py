@@ -2,7 +2,7 @@ import pytest
 import time
 from playwright.sync_api import Page, expect
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://127.0.0.1:8000"
 
 # Generate a unique ID once per test run to prevent database duplicate errors
 UNIQUE_ID = int(time.time())

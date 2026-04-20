@@ -47,6 +47,8 @@ jobs:
         DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
         TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
       run: |
+        python -m uvicorn main:app --host 127.0.0.1 --port 8000 &
+        sleep 5
         pytest tests/
 
 
