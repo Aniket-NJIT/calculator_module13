@@ -47,9 +47,15 @@ jobs:
         DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
         TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
       run: |
+        # 1. Run all standard unit/integration tests first (ignoring E2E)
+        pytest tests/ --ignore=tests/test_e2e.py
+        
+        # 2. Start the live server (this will re-create the fresh tables!)
         python -m uvicorn main:app --host 127.0.0.1 --port 8000 &
         sleep 5
-        pytest tests/
+        
+        # 3. Run the Playwright E2E tests against the live server
+        pytest tests/test_e2e.py
 
 
   # 2. SECURITY SCAN JOB
